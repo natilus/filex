@@ -1,5 +1,6 @@
 /*
  * @author Nathaniel Swan
+ * Filex
  * File explorer framework for my COS226 class project.
  *
 */
@@ -21,6 +22,13 @@ import javafx.scene.control.TextField;
 public class Filex extends Application
 {
 
+    public Text title;
+    public TextField searchBox;
+    public ProgressBar progressBar;
+
+    /*
+     * Invoked by the JavaFX Application.launch from main()
+     */
     public void start(final Stage stage) throws Exception
     {
         stage.setTitle("Filex");
@@ -28,6 +36,9 @@ public class Filex extends Application
         stage.show();
     }
 
+    /*
+     * Construct the major components in a layout for the GUI
+     */
     public Scene buildComponents()
     {
         final BorderPane borderpane = new BorderPane();
@@ -36,9 +47,9 @@ public class Filex extends Application
         leftPane.setPadding(new Insets(10));
         leftPane.setSpacing(8);
 
-        Text title = getSearchTitle();
-        TextField searchBox = getSearchBox();
-        ProgressBar progressBar = getProgressBar(); 
+        title = getText("Search");
+        searchBox = getTextField();
+        progressBar = getProgressBar(); 
 
         leftPane.getChildren().addAll(title, searchBox, progressBar);
         borderpane.setLeft(leftPane);
@@ -48,24 +59,36 @@ public class Filex extends Application
         return scene;        
     }
 
-
-    public Text getSearchTitle()
+    /*
+     * Get a formatted string
+     * @param t     string to be formatted
+     * @return      formatted string
+     */
+    public Text getText(String t)
     {
-        Text title = new Text("Search");
+        Text title = new Text(t);
         title.setFont(Font.font("Arial", FontWeight.BOLD, 14));
         return title;
     }
 
-    public TextField getSearchBox()
+    /*
+     * Get a TextField object --used for user input
+     * @return      generic TextField object with no modifications 
+     */
+    public TextField getTextField()
     {
         TextField query = new TextField();
         return query;
     }
 
+    /*
+     * Get a ProgressBar that will oscillate signifying some execution
+     * @return      progress bar that oscillates
+     */
     public ProgressBar getProgressBar()
     {
         ProgressBar pb = new ProgressBar();
-        pb.setProgress(-1);
+        pb.setProgress(-1); // -1 for oscillation (in progress)
         return pb;
     }
 
