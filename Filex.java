@@ -6,27 +6,20 @@
 */
 
 import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
+import javafx.scene.Scene;
 import javafx.scene.Group;
 import javafx.scene.text.Text;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.Label;
-import javafx.scene.control.Button;
-import javafx.scene.layout.GridPane;
-import javafx.scene.control.ListView;
-import javafx.collections.ObservableList;
-import javafx.scene.control.ProgressIndicator;
+import javafx.scene.layout.*;
+import javafx.scene.control.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.layout.ColumnConstraints;
+import javafx.stage.Stage;
+import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.control.TextField;
+import javafx.geometry.HPos;
 
 public class Filex extends Application
 {
@@ -34,9 +27,9 @@ public class Filex extends Application
     public Text title;
     public TextField searchBox;
     public ProgressBar progressBar;
-    public ListView<String> listPane;
-    public List<String> resultsList;
-    public ObservableList<String> observableList;
+    public ListView<GridPane> listPane;
+    public List<GridPane> resultsList;
+    public ObservableList<GridPane> observableList;
 
 
     /*
@@ -70,14 +63,21 @@ public class Filex extends Application
 
         //listPane.setPrefHeight(470);
         //listPane.setPrefWidth(500);
-        listPane = new ListView<String>();
-        resultsList = new ArrayList<String>();
+        listPane = new ListView<GridPane>();
+        resultsList = new ArrayList<GridPane>();
         observableList = FXCollections.observableList(resultsList);
-        observableList.add("Negative Item");
-        observableList.add("Zeroith Item");
-        observableList.add("First Item");
-        observableList.add("Second Item");
-        System.out.println(resultsList);
+        observableList.add(buildListItem("path/to/my/file", "D"));
+        observableList.add(buildListItem("path/to/my/file", "D"));
+        observableList.add(buildListItem("path/to/my/file", "D"));
+        observableList.add(buildListItem("path/to/my/file", "D"));
+        observableList.add(buildListItem("path/to/my/file", "F"));
+        observableList.add(buildListItem("path/to/my/file", "D"));
+        observableList.add(buildListItem("path/to/my/file", "D"));
+        observableList.add(buildListItem("path/to/my/file", "D"));
+        observableList.add(buildListItem("path/to/my/file", "F"));
+        observableList.add(buildListItem("path/to/my/file", "F"));
+        observableList.add(buildListItem("path/to/my/file", "D"));
+        observableList.add(buildListItem("path/to/my/file", "F"));
         listPane.setItems(observableList);
         borderpane.setCenter(listPane);
 
@@ -118,31 +118,46 @@ public class Filex extends Application
         return pb;
     }
 
-/*
- * Build a grid pane that will be inserted into each row in the list view.
- * The reason for using a grid pane is to customize the row such that it 
- * includes a button for previewing the file that the row corresponds to.
- */
  //   public void getSearchResults()
  //   {
  //       setListItem("my/path/to/a/file", 1);
  //   }
 
- //   public void setListItem(String path, int type)
- //   {
- //       GridPane gp = new GridPane();
- //       gp.getColumnConstraints().add(new ColumnConstraints(50));
- //       gp.getColumnConstraints().add(new ColumnConstraints(350));
- //       gp.getColumnConstraints().add(new ColumnConstraints(100));
- //       
- //       Label fileType = new Label("TYPE");    
- //       Label fileLocation = new Label(path);    
- //       Button previewButton = getButton(path);
- //       GridPane.setConstraints(fileType, 1, 1);
- //       GridPane.setConstraints(fileLocation, 2, 1);
- //       GridPane.setConstraints(previewButton, 3, 1);
- //       searchResults.add(gp); 
- //   }
+/*
+ * Build a grid pane that will be inserted into each row in the list view.
+ * The reason for using a grid pane is to customize the row such that it 
+ * includes a button for previewing the file that the row corresponds to.
+ */
+    public GridPane buildListItem(String path, String type)
+    {
+
+        GridPane gp = new GridPane();
+        ColumnConstraints col1 = new ColumnConstraints(25);
+        col1.setHalignment(HPos.CENTER);
+        ColumnConstraints col2 = new ColumnConstraints(400);
+        col2.setHalignment(HPos.LEFT);
+        ColumnConstraints col3 = new ColumnConstraints(100);
+        col3.setHalignment(HPos.CENTER);
+
+        gp.getColumnConstraints().add(col1);
+        gp.getColumnConstraints().add(col2);
+        gp.getColumnConstraints().add(col3);
+
+        Label fileType = new Label(type);    
+        Label fileLocation = new Label(path);    
+        gp.setMargin(fileLocation, new Insets(0,15,0,15));
+        Button previewButton = getButton("Preview");
+        gp.setMargin(previewButton, new Insets(5,5,5,5));
+
+        GridPane.setConstraints(fileType, 0, 0);
+        GridPane.setConstraints(fileLocation, 1, 0);
+        GridPane.setConstraints(previewButton, 2, 0);
+        gp.setGridLinesVisible(true);
+        gp.getChildren().addAll(fileType, fileLocation, previewButton);
+
+        return gp;
+
+    }
 
 /*
  * Return a button with a specified name
