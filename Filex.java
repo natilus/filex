@@ -1,25 +1,38 @@
 /*
+ * Project Filex
+ * File explorer software for my COS226 project.
  * @author Nathaniel Swan
- * Filex
- * File explorer framework for my COS226 class project.
- *
 */
 
 import javafx.application.Application;
-import java.util.List;
-import java.util.ArrayList;
+import javafx.stage.Stage;
+
+import javafx.event.EventHandler;
+import javafx.event.ActionEvent;
+
 import javafx.scene.Scene;
 import javafx.scene.Group;
 import javafx.scene.text.Text;
 import javafx.scene.layout.*;
-import javafx.scene.control.*;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Label;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ListView;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.stage.Stage;
-import javafx.collections.ObservableList;
-import javafx.collections.FXCollections;
+import javafx.scene.paint.Color;
+
 import javafx.geometry.Insets;
 import javafx.geometry.HPos;
+import javafx.geometry.Pos;
+
+import java.util.List;
+import java.util.ArrayList;
+
+import javafx.collections.ObservableList;
+import javafx.collections.FXCollections;
 
 public class Filex extends Application
 {
@@ -27,10 +40,23 @@ public class Filex extends Application
     public Text title;
     public TextField searchBox;
     public ProgressBar progressBar;
+    public Button searchButton;
+    public Button cancelButton;
+    public CheckBox regexFlag;
+    public CheckBox innerFileSearchFlag;
     public ListView<GridPane> listPane;
     public List<GridPane> resultsList;
     public ObservableList<GridPane> observableList;
+    public FXComponent component = new FXComponent();
+    public Boolean isSearching = false;
 
+    /*
+     * Main function used to instantiate the Filex system
+     */ 
+    public static void main(final String[] arguments)
+    {
+        Application.launch(arguments);
+    }
 
     /*
      * Invoked by the JavaFX Application.launch from main()
@@ -49,137 +75,146 @@ public class Filex extends Application
     public Scene buildComponents()
     {
         final BorderPane borderpane = new BorderPane();
+        final Scene scene = new Scene(borderpane, 720, 480);
+        scene.getStylesheets().add("stylesheets/styles.css");
 
+        // Build the vertical box that stacks all of the leftPane components
         VBox leftPane = new VBox();
+        leftPane.setPrefWidth(200);
+        leftPane.setAlignment(Pos.CENTER);
         leftPane.setPadding(new Insets(10));
         leftPane.setSpacing(8);
 
-        title = getText("Search");
-        searchBox = getTextField();
-        progressBar = getProgressBar(); 
+        // Build the primary components for the leftPane 
+        title = component.getText("Enter Search Criteria");
+        searchBox = component.getTextField();
+        progressBar = component.getProgressBar(); 
+        innerFileSearchFlag = component.getCheckbox("Search Within Files");
+        regexFlag = component.getCheckbox("Use Regex");
+        searchButton = component.getButton("Search");
+        //searchButton.setAlignment(Pos.CENTER_RIGHT);
 
-        leftPane.getChildren().addAll(title, searchBox, progressBar);
+        searchButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                toggleSearchIndicators();
+                isSearching = !isSearching;
+            }
+        }); 
+
+        // Make this line shorter with .add() it works!
+        leftPane.getChildren().addAll(title, searchBox, innerFileSearchFlag, regexFlag, progressBar);
+        leftPane.getChildren().add(searchButton);
         borderpane.setLeft(leftPane);
 
-        //listPane.setPrefHeight(470);
-        //listPane.setPrefWidth(500);
         listPane = new ListView<GridPane>();
+        listPane.setPrefHeight(500);
+        listPane.setPrefWidth(550);
         resultsList = new ArrayList<GridPane>();
         observableList = FXCollections.observableList(resultsList);
-        observableList.add(buildListItem("path/to/my/file", "D"));
-        observableList.add(buildListItem("path/to/my/file", "D"));
-        observableList.add(buildListItem("path/to/my/file", "D"));
-        observableList.add(buildListItem("path/to/my/file", "D"));
-        observableList.add(buildListItem("path/to/my/file", "F"));
-        observableList.add(buildListItem("path/to/my/file", "D"));
-        observableList.add(buildListItem("path/to/my/file", "D"));
-        observableList.add(buildListItem("path/to/my/file", "D"));
-        observableList.add(buildListItem("path/to/my/file", "F"));
-        observableList.add(buildListItem("path/to/my/file", "F"));
-        observableList.add(buildListItem("path/to/my/file", "D"));
-        observableList.add(buildListItem("path/to/my/file", "F"));
+        observableList.add(getListItem("D", "path/to/my/file"));
         listPane.setItems(observableList);
         borderpane.setCenter(listPane);
 
-        final Scene scene = new Scene(borderpane, 720, 480);
         return scene;        
     }
 
-    /*
-     * Get a formatted string
-     * @param t     string to be formatted
-     * @return      formatted string
-     */
-    public Text getText(String t)
-    {
-        Text title = new Text(t);
-        title.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        return title;
+    public void toggleSearchIndicators() {
+        if (isSearching){
+            showProgressBar();
+            //hideSearchButton();
+        }
+        else{
+            hideProgressBar();
+            //showSearchButton();
+        }
+        //isSearching = !isSearching;
     }
 
     /*
-     * Get a TextField object --used for user input
-     * @return      generic TextField object with no modifications 
-     */
-    public TextField getTextField()
+    * Build a grid pane that will be inserted into each row in the list view.
+    * The reason for using a grid pane is to customize the row such that it 
+    * includes a button for previewing the file that the row corresponds to.
+    */
+    public GridPane getListItem(String type, String path)
     {
-        TextField query = new TextField();
-        return query;
+        SearchResult result = new SearchResult(type, path);
+        return result.getSearchResult();
     }
 
     /*
-     * Get a ProgressBar that will oscillate signifying some execution
-     * @return      progress bar that oscillates
+     * This will hide the cancel button. This function is used to set 
+     * the visibility of the cancel button such that it is not seen
+     * @return     hides the cancel button from the left border pane 
      */
-    public ProgressBar getProgressBar()
-    {
-        ProgressBar pb = new ProgressBar();
-        pb.setProgress(-1); // -1 for oscillation (in progress)
-        return pb;
+    public void hideCancelButton(){
+        this.cancelButton.setVisible(false);
     }
 
- //   public void getSearchResults()
- //   {
- //       setListItem("my/path/to/a/file", 1);
- //   }
-
-/*
- * Build a grid pane that will be inserted into each row in the list view.
- * The reason for using a grid pane is to customize the row such that it 
- * includes a button for previewing the file that the row corresponds to.
- */
-    public GridPane buildListItem(String path, String type)
-    {
-
-        GridPane gp = new GridPane();
-        ColumnConstraints col1 = new ColumnConstraints(25);
-        col1.setHalignment(HPos.CENTER);
-        ColumnConstraints col2 = new ColumnConstraints(400);
-        col2.setHalignment(HPos.LEFT);
-        ColumnConstraints col3 = new ColumnConstraints(100);
-        col3.setHalignment(HPos.CENTER);
-
-        gp.getColumnConstraints().add(col1);
-        gp.getColumnConstraints().add(col2);
-        gp.getColumnConstraints().add(col3);
-
-        Label fileType = new Label(type);    
-        Label fileLocation = new Label(path);    
-        gp.setMargin(fileLocation, new Insets(0,15,0,15));
-        Button previewButton = getButton("Preview");
-        gp.setMargin(previewButton, new Insets(5,5,5,5));
-
-        GridPane.setConstraints(fileType, 0, 0);
-        GridPane.setConstraints(fileLocation, 1, 0);
-        GridPane.setConstraints(previewButton, 2, 0);
-        gp.setGridLinesVisible(true);
-        gp.getChildren().addAll(fileType, fileLocation, previewButton);
-
-        return gp;
-
+    /*
+     * This will show the search button. 
+     * @return      shows the cancel button in the left borderpane
+     */
+    public void showCancelButton(){
+        this.cancelButton.setVisible(true);
     }
 
-/*
- * Return a button with a specified name
- * @param name      string that will be the name of the button
- * @return          JavaFX Button with a custom name
- */  
-    public Button getButton(String name)
-    {
-        Button btn = new Button(name);
+    /*
+     * This will create the cancel button. This function is used to show 
+     * that the application has a search in progess.
+     * @return      shows the search button in the left borderpane
+     */
+    public Button createCancelButton(){
+        Button btn = this.component.getButton("Cancel");
+        btn.setCancelButton(true);
         return btn;
     }
 
     /*
-     * Main function used to instantiate the Filex system
-     */ 
-    public static void main(final String[] arguments)
-    {
-        Application.launch(arguments);
+     * This will hide the search button. This function is used to show 
+     * that the application has a search in progess.
+     * @return      hides the search button in the left borderpane
+     */
+    public void hideSearchButton(){
+        this.searchButton.setVisible(false);
     }
 
-    public void handleSearchPressed()
-    {
-
+    /*
+     * This will show the search button. This is primarily used when
+     * the application is opened and there is no search in progess.
+     * @return      shows the search button in the left borderpane
+     */
+    public void showSearchButton(){
+        this.searchButton.setVisible(true);
     }
+
+    /*
+     * This will create the search button. We want to set this button
+     * to be the default button so that when the user presses the 
+     * "Enter" key, the application will pick it up
+     * @return      default button used to submit a search
+     */
+    public Button createSearchButton(String name){
+        Button btn = this.component.getButton(name);
+        btn.setDefaultButton(true);
+        return btn;
+    }
+
+    /*
+     * This will hide the progress bar. This is used to show that 
+     * the application has no search in progess.
+     * @return      hides the progress bar in the left borderpane
+     */
+    public void hideProgressBar(){
+        this.progressBar.setVisible(false);
+    }
+
+    /*
+     * This will show the progress bar. This is primarily used when
+     * there is a search in progess.
+     * @return      shows the progress bar in the left borderpane
+     */
+    public void showProgressBar(){
+        this.progressBar.setVisible(true);
+    }
+
 }
