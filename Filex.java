@@ -47,7 +47,7 @@ public class Filex extends Application
     public ListView<GridPane> listPane;
     public List<GridPane> resultsList;
     public ObservableList<GridPane> observableList;
-    public FXComponent component = new FXComponent();
+    public FXComponent component;
     public Boolean isSearching = false;
 
     /*
@@ -71,6 +71,7 @@ public class Filex extends Application
 
     /*
      * Construct the major components in a layout for the GUI
+     * @return  scene
      */
     public Scene buildComponents()
     {
@@ -86,6 +87,7 @@ public class Filex extends Application
         leftPane.setSpacing(8);
 
         // Build the primary components for the leftPane 
+        component = new FXComponent();
         title = component.getText("Enter Search Criteria");
         searchBox = component.getTextField();
         progressBar = component.getProgressBar(); 
@@ -118,6 +120,12 @@ public class Filex extends Application
         return scene;        
     }
 
+    /*
+     * This is the mechanism in control of displaying the in-Progress
+     * bar as a search is executing, and setting the visibility off 
+     * otherwise.<br>
+     * post:    toggle progressBar visibility
+     */
     public void toggleSearchIndicators() {
         if (isSearching){
             showProgressBar();
@@ -133,7 +141,8 @@ public class Filex extends Application
     /*
     * Build a grid pane that will be inserted into each row in the list view.
     * The reason for using a grid pane is to customize the row such that it 
-    * includes a button for previewing the file that the row corresponds to.
+    * includes a button for previewing the file that the row corresponds to.<br>
+    * @return   SearchResult<GridPane>
     */
     public GridPane getListItem(String type, String path)
     {
@@ -143,16 +152,16 @@ public class Filex extends Application
 
     /*
      * This will hide the cancel button. This function is used to set 
-     * the visibility of the cancel button such that it is not seen
-     * @return     hides the cancel button from the left border pane 
+     * the visibility of the cancel button such that it is not seen.<br>
+     * post:    hides the cancel button from the left border pane 
      */
     public void hideCancelButton(){
         this.cancelButton.setVisible(false);
     }
 
     /*
-     * This will show the search button. 
-     * @return      shows the cancel button in the left borderpane
+     * This will show the search button.<br>
+     * post:    shows the cancel button in the left borderpane
      */
     public void showCancelButton(){
         this.cancelButton.setVisible(true);
@@ -160,8 +169,8 @@ public class Filex extends Application
 
     /*
      * This will create the cancel button. This function is used to show 
-     * that the application has a search in progess.
-     * @return      shows the search button in the left borderpane
+     * that the application has a search in progess.<br>
+     * @return  cancelButton
      */
     public Button createCancelButton(){
         Button btn = this.component.getButton("Cancel");
@@ -171,8 +180,8 @@ public class Filex extends Application
 
     /*
      * This will hide the search button. This function is used to show 
-     * that the application has a search in progess.
-     * @return      hides the search button in the left borderpane
+     * that the application has a search in progess.<br>
+     * post:    hides the search button in the left borderpane
      */
     public void hideSearchButton(){
         this.searchButton.setVisible(false);
@@ -180,8 +189,8 @@ public class Filex extends Application
 
     /*
      * This will show the search button. This is primarily used when
-     * the application is opened and there is no search in progess.
-     * @return      shows the search button in the left borderpane
+     * the application is opened and there is no search in progess.<br>
+     * post:     shows the search button in the left borderpane
      */
     public void showSearchButton(){
         this.searchButton.setVisible(true);
@@ -190,8 +199,8 @@ public class Filex extends Application
     /*
      * This will create the search button. We want to set this button
      * to be the default button so that when the user presses the 
-     * "Enter" key, the application will pick it up
-     * @return      default button used to submit a search
+     * "Enter" key, the application will pick it up<br>
+     * @return  searchButton 
      */
     public Button createSearchButton(String name){
         Button btn = this.component.getButton(name);
@@ -201,8 +210,8 @@ public class Filex extends Application
 
     /*
      * This will hide the progress bar. This is used to show that 
-     * the application has no search in progess.
-     * @return      hides the progress bar in the left borderpane
+     * the application has no search in progess.<br>
+     * post:     hides the progress bar in the left borderpane
      */
     public void hideProgressBar(){
         this.progressBar.setVisible(false);
@@ -210,8 +219,8 @@ public class Filex extends Application
 
     /*
      * This will show the progress bar. This is primarily used when
-     * there is a search in progess.
-     * @return      shows the progress bar in the left borderpane
+     * there is a search in progess.<br>
+     * post:     shows the progress bar in the left borderpane
      */
     public void showProgressBar(){
         this.progressBar.setVisible(true);
