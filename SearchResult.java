@@ -42,17 +42,18 @@ public class SearchResult{
     }
 
     public void formatColumns(){
-        addColumnToGridPane(this.col1); 
         this.col1.setPercentWidth(5);
         this.col1.setHalignment(HPos.CENTER);
 
-        addColumnToGridPane(this.col2); 
         this.col2.setPercentWidth(70);
         this.col2.setHalignment(HPos.LEFT);
 
-        addColumnToGridPane(this.col3); 
         this.col3.setPercentWidth(25);
         this.col3.setHalignment(HPos.CENTER);
+
+        addColumnToGridPane(this.col1); 
+        addColumnToGridPane(this.col2); 
+        addColumnToGridPane(this.col3); 
     }
 
     public GridPane getSearchResult(){

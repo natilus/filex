@@ -4,8 +4,11 @@
  * @author Nathaniel Swan
 */
 
+import java.io.File;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
@@ -20,6 +23,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.paint.Color;
@@ -36,19 +41,20 @@ import javafx.collections.FXCollections;
 
 public class Filex extends Application
 {
-
+    private String search;
+    private TextField searchBox;
+    private Boolean searchError;
     public Text title;
-    public TextField searchBox;
+    public Alert inputErr;
     public ProgressBar progressBar;
     public Button searchButton;
     public Button cancelButton;
     public CheckBox regexFlag;
     public CheckBox innerFileSearchFlag;
-    public ListView<GridPane> listPane;
-    public List<GridPane> resultsList;
     public ObservableList<GridPane> observableList;
     public FXComponent component;
     public Boolean isSearching = false;
+    public Stage primaryStage;
 
     /*
      * Main function used to instantiate the Filex system
@@ -64,6 +70,7 @@ public class Filex extends Application
     @Override
     public void start(final Stage stage) throws Exception
     {
+        this.primaryStage = stage;
         stage.setTitle("Filex");
         stage.setScene(buildComponents());
         stage.show();
@@ -90,6 +97,7 @@ public class Filex extends Application
         component = new FXComponent();
         title = component.getText("Enter Search Criteria");
         searchBox = component.getTextField();
+        
         progressBar = component.getProgressBar(); 
         innerFileSearchFlag = component.getCheckbox("Search Within Files");
         regexFlag = component.getCheckbox("Use Regex");
@@ -98,8 +106,14 @@ public class Filex extends Application
 
         searchButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
-                toggleSearchIndicators();
-                isSearching = !isSearching;
+                if(checkForSearchError()){
+                    noSearchCriteria();
+                }
+                else{
+                    openDirectory();
+                }
+                //toggleSearchIndicators();
+                //isSearching = !isSearching;
             }
         }); 
 
@@ -108,16 +122,48 @@ public class Filex extends Application
         leftPane.getChildren().add(searchButton);
         borderpane.setLeft(leftPane);
 
-        listPane = new ListView<GridPane>();
+        ListView<GridPane> listPane = new ListView<GridPane>();
         listPane.setPrefHeight(500);
         listPane.setPrefWidth(550);
-        resultsList = new ArrayList<GridPane>();
+        List<GridPane> resultsList = new ArrayList<GridPane>();
         observableList = FXCollections.observableList(resultsList);
         observableList.add(getListItem("D", "path/to/my/file"));
         listPane.setItems(observableList);
         borderpane.setCenter(listPane);
 
         return scene;        
+    }
+
+    /*
+     * Return whether or not some search text has been entered into the 
+     * searchBox
+     * @return  false if empty, true otherwise
+     */
+    public Boolean checkForSearchError(){
+        if( this.searchBox.getCharacters().length() == 0 )
+            return true;
+        return false;
+    }
+
+    /* 
+     * This function prompts the user to actually enter some search text into
+     * the searchBox label.
+     */
+    public void noSearchCriteria(){
+        Alert inputErr = new Alert(AlertType.INFORMATION);
+        inputErr.setTitle("Error Searching");
+        inputErr.setHeaderText("Please enter search criteria.");
+        inputErr.show();
+    }
+
+    //Ipsum
+    public File openDirectory(){
+        DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle("Choose a Directory");
+        File defaultDirectory = new File("/");
+        chooser.setInitialDirectory(defaultDirectory);
+        File selectedDirectory = chooser.showDialog(this.primaryStage);
+        return selectedDirectory;
     }
 
     /*

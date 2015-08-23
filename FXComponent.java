@@ -16,7 +16,7 @@ public class FXComponent {
 
     /*
      * Get a ProgressBar that will oscillate signifying some execution
-     * @return      progress bar that oscillates
+     * @return      ProgressBar
      */
     public ProgressBar getProgressBar()
     {
@@ -29,7 +29,7 @@ public class FXComponent {
     /*
      * Get a formatted string
      * @param t     string to be formatted
-     * @return      formatted string
+     * @return      Text
      */
     public Text getText(String t)
     {
@@ -40,7 +40,7 @@ public class FXComponent {
 
     /*
      * Get a TextField object --used for user input
-     * @return      generic TextField object with no modifications 
+     * @return      TextField
      */
     public TextField getTextField()
     {
@@ -51,7 +51,7 @@ public class FXComponent {
     /*
     * Return a button with a specified name
     * @param name      string that will be the name of the button
-    * @return          JavaFX Button with a custom name
+    * @return          Button
     */  
     public Button getButton(String name)
     {
