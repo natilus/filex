@@ -1,6 +1,6 @@
-# Author => Nathaniel Swan
-# Date   => November 2015
-# Repo   => https://github.com/natilus/filex
+Author    => Nathaniel Swan
+Last Edit => November 2015
+Repo      => https://github.com/natilus/filex
 
 
 ##############################################
@@ -9,12 +9,12 @@
 A Java application written for a project in my COS226 class.
 
 ###Quick Start (Linux and Mac)
-1) Open a terminal window
-2) Clone the filex repository
-  `$ git clone https://github.com/natilus/filex.git`
+1) Open a terminal window<br>
+2) Clone the filex repository<br>
+  `$ git clone https://github.com/natilus/filex.git`<br>
 3) Navigate to the cloned directory and compile the `.java` files
-  `$ cd filex`
-  `$ javac *.java`
+  `$ cd filex`<br>
+  `$ javac *.java`<br>
 4) Run the application (be sure to have JavaFX 7 or newer installed)
 
 ###Quick Start (Windows)
