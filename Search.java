@@ -8,6 +8,7 @@
 
 import java.util.List;
 import java.io.File;
+import java.lang.String;
 import java.util.ArrayList;
 
 
@@ -21,24 +22,23 @@ public class Search{
     private int depthSearched;
     private int filesMatched;
     private int directoriesMatched;
-
-    public List<String> list = new ArrayList<String>(); //DEBUG
+    private List<SearchResult> results;
     
-    public Search(){
-        this.query = "";
-        this.topLevelDirectory = "";
+    public Search(String query, File path, Boolean regex, Boolean inner){
+        setQuery(query);
+        setTopLevelDirectory(path.toString()); 
         this.searchTime = 0; 
         this.depthSearched = 0;
         this.filesMatched = 0;
         this.directoriesMatched = 0;
-        this.useInnerSearch = false;
-        this.useRegex = false;
+        this.useInnerSearch = inner;
+        this.useRegex = regex;
+        this.results = new ArrayList<SearchResult>();
+        startSearch(query,path);
     }
-
-    public void addMatch(String match){
-        this.list.add(match);
-        System.out.println("Added: " + match);
-        this.filesMatched += 1;
+   
+    public List<SearchResult> getSearchResults(){
+        return results;
     }
 
     public void setQuery(String input){
@@ -56,23 +56,26 @@ public class Search{
     public void setRegex(){
         this.useRegex = true;
     }
-    
-   // public static File[] listFilesMatching(File root, String regex) {
-   //     if(!root.isDirectory()) {
-   //         throw new IllegalArgumentException(root+" is no directory.");
-   //     }
-   //     final Pattern p = Pattern.compile(regex); // careful: could also throw an exception!
-   //     return root.listFiles(new FileFilter(){
-   //         @Override
-   //         public boolean accept(File file) {
-   //             return p.matcher(file.getName()).matches();
-   //         }
-   //     });
-   // }
-    
-    public void startSearch(){
 
+    public void startSearch(String name, File path){
+        File[] list = path.listFiles();
+        name = name.toLowerCase();
+        if(list!=null)
+        for (File fil : list){
+            
+            String fType = "";
+            String fileName = fil.toString(); 
+            
+            if(fileName.toLowerCase().contains(name)){
 
+                if (fil.isDirectory())
+                    fType = "D";                
+                else
+                    fType = "F";
+                
+                results.add(new SearchResult(fType, fileName));
+            }
+        }
     }
 }
 

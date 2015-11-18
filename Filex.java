@@ -9,7 +9,6 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 
@@ -35,26 +34,29 @@ import javafx.geometry.Pos;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
 
 public class Filex extends Application
 {
-    private String search;
-    private TextField searchBox;
-    private Boolean searchError;
+    public String search;
+    public TextField searchBox;
+    public Boolean searchError;
+    public CheckBox innerFileSearchFlag;
+    public ListView<GridPane> listPane;
     public Text title;
     public Alert inputErr;
     public ProgressBar progressBar;
     public Button searchButton;
     public Button cancelButton;
     public CheckBox regexFlag;
-    public CheckBox innerFileSearchFlag;
     public ObservableList<GridPane> observableList;
     public FXComponent component;
-    public Boolean isSearching = false;
     public Stage primaryStage;
+    public List<GridPane> resultsList;
+    public Search mySearch;
 
     /*
      * Main function used to instantiate the Filex system
@@ -97,41 +99,68 @@ public class Filex extends Application
         component = new FXComponent();
         title = component.getText("Enter Search Criteria");
         searchBox = component.getTextField();
-        
         progressBar = component.getProgressBar(); 
         innerFileSearchFlag = component.getCheckbox("Search Within Files");
         regexFlag = component.getCheckbox("Use Regex");
         searchButton = component.getButton("Search");
-        //searchButton.setAlignment(Pos.CENTER_RIGHT);
 
+        /*
+         * Defines the function of the search button
+         * such that if no errors occur, start the search!
+         */
         searchButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 if(checkForSearchError()){
                     noSearchCriteria();
                 }
                 else{
-                    openDirectory();
+                    long x=0;
+                    buildSearch();
+                    isSearching(true);
+                    // pretend the search is actually doing something complicated
+                    isSearching(false);
+                    updateSearchResults();
                 }
-                //toggleSearchIndicators();
-                //isSearching = !isSearching;
             }
         }); 
 
-        // Make this line shorter with .add() it works!
-        leftPane.getChildren().addAll(title, searchBox, innerFileSearchFlag, regexFlag, progressBar);
+        // Build the left pane with components
+        leftPane.getChildren().add(title);
+        leftPane.getChildren().add(searchBox);
+        leftPane.getChildren().add(innerFileSearchFlag);
+        leftPane.getChildren().add(regexFlag);
+        leftPane.getChildren().add(progressBar);
+        hideProgressBar(); // progress bar is hidden to start
         leftPane.getChildren().add(searchButton);
         borderpane.setLeft(leftPane);
 
-        ListView<GridPane> listPane = new ListView<GridPane>();
+        listPane = new ListView<GridPane>();
         listPane.setPrefHeight(500);
         listPane.setPrefWidth(550);
-        List<GridPane> resultsList = new ArrayList<GridPane>();
+        resultsList = new ArrayList<GridPane>();
         observableList = FXCollections.observableList(resultsList);
-        observableList.add(getListItem("D", "path/to/my/file"));
         listPane.setItems(observableList);
         borderpane.setCenter(listPane);
 
         return scene;        
+    }
+
+    /*
+     * Iterate over the results from a search and display them
+     */
+    public void updateSearchResults(){ 
+        List<SearchResult> list = mySearch.getSearchResults(); 
+        for (SearchResult result : list){
+            observableList.add(result.getResult());
+        }
+    }
+
+    /*
+     * Convert the entered text characters to a string
+     * @ return  search query
+     */
+    public String getSearchQuery(){
+        return this.searchBox.getCharacters().toString();
     }
 
     /*
@@ -152,11 +181,13 @@ public class Filex extends Application
     public void noSearchCriteria(){
         Alert inputErr = new Alert(AlertType.INFORMATION);
         inputErr.setTitle("Error Searching");
-        inputErr.setHeaderText("Please enter search criteria.");
+        inputErr.setHeaderText("Please enter valid search criteria.");
         inputErr.show();
     }
 
-    //Ipsum
+    /* 
+     * Prompt user for selection of a directory
+     */
     public File openDirectory(){
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("Choose a Directory");
@@ -166,14 +197,15 @@ public class Filex extends Application
         return selectedDirectory;
     }
 
+    //TODO
     /*
      * This is the mechanism in control of displaying the in-Progress
      * bar as a search is executing, and setting the visibility off 
      * otherwise.<br>
      * post:    toggle progressBar visibility
      */
-    public void toggleSearchIndicators() {
-        if (isSearching){
+    public void isSearching(Boolean searching) {
+        if (searching){
             showProgressBar();
             //hideSearchButton();
         }
@@ -181,19 +213,6 @@ public class Filex extends Application
             hideProgressBar();
             //showSearchButton();
         }
-        //isSearching = !isSearching;
-    }
-
-    /*
-    * Build a grid pane that will be inserted into each row in the list view.
-    * The reason for using a grid pane is to customize the row such that it 
-    * includes a button for previewing the file that the row corresponds to.<br>
-    * @return   SearchResult<GridPane>
-    */
-    public GridPane getListItem(String type, String path)
-    {
-        SearchResult result = new SearchResult(type, path);
-        return result.getSearchResult();
     }
 
     /*
@@ -203,6 +222,28 @@ public class Filex extends Application
      */
     public void hideCancelButton(){
         this.cancelButton.setVisible(false);
+    }
+
+    /*
+     * This will return the current state of the regex checkbox as a
+     * boolean. If the box is checked, return true, otherwise false
+     */
+    public Boolean getRegexFlag(){
+        if(regexFlag.isSelected())
+           return true;
+        else
+           return false; 
+    }
+
+    /*
+     * This will return the current state of the inner search checkbox as a
+     * boolean. If the box is checked, return true, otherwise false
+     */
+    public Boolean getInnerSearchFlag(){
+        if(this.innerFileSearchFlag.isSelected())
+           return true;
+        else
+           return false; 
     }
 
     /*
@@ -260,7 +301,7 @@ public class Filex extends Application
      * post:     hides the progress bar in the left borderpane
      */
     public void hideProgressBar(){
-        this.progressBar.setVisible(false);
+        progressBar.setVisible(false);
     }
 
     /*
@@ -269,7 +310,13 @@ public class Filex extends Application
      * post:     shows the progress bar in the left borderpane
      */
     public void showProgressBar(){
-        this.progressBar.setVisible(true);
+        progressBar.setVisible(true);
     }
 
+    /*
+     * Invoke a search based on query, directory, regex compatability, and inner searching
+     */ 
+    public void buildSearch(){
+        mySearch = new Search(getSearchQuery(), openDirectory(), getRegexFlag(), getInnerSearchFlag());
+    }
 }

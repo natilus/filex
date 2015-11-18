@@ -25,7 +25,7 @@ public class SearchResult{
     private ColumnConstraints col2 = new ColumnConstraints();
     private ColumnConstraints col3 = new ColumnConstraints();
     private GridPane gp = new GridPane();
-    private Button previewButton = new Button();
+    private Button auxButton = new Button();
     private Label typeLabel = new Label();
     private Label pathLabel = new Label();
  
@@ -33,12 +33,23 @@ public class SearchResult{
     public SearchResult(String type, String path){ 
         formatColumns();
         makeLabels(type, path);
-        setPreviewButton();
+        setButton(type);
         formatSearchResultLayout();
     }
 
+    public void setButton(String type){
+        if(type.equals("D"))
+            setOpenButton();
+        else if (type.equals("F"))
+            setPreviewButton();
+    }
+
     public void setPreviewButton(){
-        this.previewButton = this.component.getButton("Preview");
+        this.auxButton = this.component.getButton("Preview");
+    }
+
+    public void setOpenButton(){
+        this.auxButton = this.component.getButton("Open");
     }
 
     public void formatColumns(){
@@ -56,7 +67,7 @@ public class SearchResult{
         addColumnToGridPane(this.col3); 
     }
 
-    public GridPane getSearchResult(){
+    public GridPane getResult(){
         return this.gp; 
     }
 
@@ -70,18 +81,19 @@ public class SearchResult{
     }
 
     public void setPreviewButtonFunction(){
+        
     }
 
     public void formatSearchResultLayout(){
         this.gp.setConstraints(this.typeLabel, 0, 0);
         this.gp.setConstraints(this.pathLabel, 1, 0);
-        this.gp.setConstraints(this.previewButton, 2, 0);
+        this.gp.setConstraints(this.auxButton, 2, 0);
 
         // Insets ( top, right, bottom, left ) 
         this.gp.setMargin(this.pathLabel, new Insets(0,15,0,15));
-        this.gp.setMargin(this.previewButton, new Insets(5,5,5,5));
+        this.gp.setMargin(this.auxButton, new Insets(5,5,5,5));
         this.gp.setGridLinesVisible(true); //njs
         this.gp.getStyleClass().add("filetype");
-        this.gp.getChildren().addAll(typeLabel, pathLabel, previewButton);
+        this.gp.getChildren().addAll(typeLabel, pathLabel, auxButton);
     }
 }
