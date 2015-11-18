@@ -1,6 +1,6 @@
-Author    => Nathaniel Swan
-Last Edit => November 2015
-Repo      => https://github.com/natilus/filex
+Author    => Nathaniel Swan<br>
+Last Edit => November 2015<br>
+Repo      => https://github.com/natilus/filex<br>
 
 
 ##############################################
